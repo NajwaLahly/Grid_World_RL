@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.table import Table
 
-##
+###
 # global variables
 BOARD_ROWS = 3
 BOARD_COLS = 4
