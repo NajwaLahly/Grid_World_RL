@@ -59,6 +59,7 @@ class State:
             return False
         return True
 
+
 class Agent:
 
     def __init__(self):
@@ -92,7 +93,7 @@ class Agent:
             for a in self.actions:
                 E = 0
                 for act in self.actions:
-                    E += self.giveprobabilities(act, a)*self.state_values[self.State.nextPosition(act)]
+                    E += self.giveprobabilities(act, a) * self.state_values[self.State.nextPosition(act)]
                 nxt_value.append(self.State.giveReward(self.State.state) + discount * E)
                 max_value_idx = nxt_value.index(max(nxt_value))
                 value = max(nxt_value)
@@ -115,6 +116,26 @@ class World:
     def reset(self):
         self.states = []
         self.agent.State = State()
+
+    def game_scene(self):
+        pygame.init()
+        SCREEN = pygame.display.set_mode((BOARD_ROWS, BOARD_COLS))
+        CLOCK = pygame.time.Clock()
+        SCREEN.fill(BLACK)
+        while True:
+            drawGrid()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            pygame.display.update()
+
+        blockSize = 20  # Set the size of the grid block
+        for (i, j), val in np.ndenumerate(self.board):
+            rect = pygame.Rect(i * blockSize, j * blockSize,
+                               blockSize, blockSize)
+            pygame.draw.rect(SCREEN, WHITE, rect, 1)
 
     def draw_image(self):
         fig, ax = plt.subplots()
@@ -148,7 +169,6 @@ class World:
                 newWorld[i, j] = self.agent.getvalue()
                 values[(i, j)] = newWorld[i, j]
 
-
             self.agent.state_values = values
             if np.sum(np.abs(self.board - newWorld)) < 1e-3:
                 self.agent.State.end = True
@@ -158,13 +178,10 @@ class World:
             k += 1
 
 
-
-
-
 if __name__ == "__main__":
     world = World()
     world.play()
     world.draw_image()
+    world.game_scene()
 
     print(world.states)
-
