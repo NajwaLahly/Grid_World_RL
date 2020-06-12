@@ -1,6 +1,10 @@
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.table import Table
+import pygame
+import pdb
+from pprint import pprint
 
 # # feature1
 
@@ -13,6 +17,10 @@ WALL_STATE = (1, 1)
 START = (2, 0)
 DETERMINISTIC = True
 discount = 0.9
+WHITE = (200, 200, 200)
+RED = (255, 0, 0)
+BLACK = (0, 0, 0)
+GREEN = (0, 100, 0)
 
 
 class State:
@@ -55,7 +63,7 @@ class State:
             # TODO
             pass
 
-    def actionislegal(self, action):
+    def actionIsLegal(self, action):
         if self.nextPosition(action) == self.state:
             return False
         return True
@@ -76,7 +84,7 @@ class Agent:
                 self.state_values[(i, j)] = 0
 
     def giveprobabilities(self, action, otheractions):
-        if not self.State.actionislegal(action):
+        if not self.State.actionIsLegal(action):
             return 0
         else:
             if otheractions == action:
@@ -113,51 +121,64 @@ class World:
         self.agent = Agent()
         self.states = []
         self.values = []
+        self.running = True
+        self.blockSize = 200
+        self.SCREEN = pygame.display.set_mode((self.blockSize * BOARD_COLS, self.blockSize * BOARD_ROWS))
+        self.init_game()
+
+    def init_game(self):
+        pygame.init()
+        pygame.display.set_caption("GridWorld")
+        self.drawGrid()
 
     def reset(self):
         self.states = []
         self.agent.State = State()
 
-    def game_scene(self):
-        pygame.init()
-        SCREEN = pygame.display.set_mode((BOARD_ROWS, BOARD_COLS))
-        CLOCK = pygame.time.Clock()
-        SCREEN.fill(BLACK)
-        while True:
-            drawGrid()
+    def drawGrid(self):
+
+        for i in range(BOARD_ROWS):
+            for j in range(BOARD_COLS):
+                # pdb.set_trace()
+                rect = pygame.Rect(j * self.blockSize, i * self.blockSize, self.blockSize, self.blockSize)
+                if (i, j) == LOSE_STATE:
+                    pygame.draw.rect(self.SCREEN, RED, rect, 0)
+                elif (i, j) == WIN_STATE:
+                    pygame.draw.rect(self.SCREEN, GREEN, rect, 0)
+                elif (i, j) == WALL_STATE:
+                    pygame.draw.rect(self.SCREEN, WHITE, rect, 0)
+                pygame.draw.rect(self.SCREEN, WHITE, rect, 1)
+
+    def start_game(self):
+
+        while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.running = False
                     pygame.quit()
                     sys.exit()
-
             pygame.display.update()
 
-        blockSize = 20  # Set the size of the grid block
-        for (i, j), val in np.ndenumerate(self.board):
-            rect = pygame.Rect(i * blockSize, j * blockSize,
-                               blockSize, blockSize)
-            pygame.draw.rect(SCREEN, WHITE, rect, 1)
-
-    def draw_image(self):
-        fig, ax = plt.subplots()
-        ax.set_axis_off()
-        tb = Table(ax, bbox=[0, 0, 1, 1])
-        width, height = 1.0 / BOARD_COLS, 1.0 / BOARD_ROWS
-        # Add cells
-
-        for (i, j), val in np.ndenumerate(self.board):
-
-            if (i, j) == LOSE_STATE:
-                tb.add_cell(i, j, width, height, facecolor="RED", text=self.board[i, j])
-            elif (i, j) == WIN_STATE:
-                tb.add_cell(i, j, width, height, facecolor="GREEN", text=self.board[i, j])
-            elif (i, j) == WALL_STATE:
-                tb.add_cell(i, j, width, height, facecolor="GREY", text=self.board[i, j])
-            else:
-                tb.add_cell(i, j, width, height, facecolor="WHITE", text=self.board[i, j])
-
-        ax.add_table(tb)
-        plt.show()
+    # def draw_image(self):
+    #     fig, ax = plt.subplots()
+    #     ax.set_axis_off()
+    #     tb = Table(ax, bbox=[0, 0, 1, 1])
+    #     width, height = 1.0 / BOARD_COLS, 1.0 / BOARD_ROWS
+    #     # Add cells
+    #
+    #     for (i, j), val in np.ndenumerate(self.board):
+    #
+    #         if (i, j) == LOSE_STATE:
+    #             tb.add_cell(i, j, width, height, facecolor="RED", text=self.board[i, j])
+    #         elif (i, j) == WIN_STATE:
+    #             tb.add_cell(i, j, width, height, facecolor="GREEN", text=self.board[i, j])
+    #         elif (i, j) == WALL_STATE:
+    #             tb.add_cell(i, j, width, height, facecolor="GREY", text=self.board[i, j])
+    #         else:
+    #             tb.add_cell(i, j, width, height, facecolor="WHITE", text=self.board[i, j])
+    #
+    #     ax.add_table(tb)
+    #     plt.show()
 
     def play(self, rounds=100):
 
@@ -181,8 +202,4 @@ class World:
 
 if __name__ == "__main__":
     world = World()
-    world.play()
-    world.draw_image()
-    world.game_scene()
-
-    print(world.states)
+    world.start_game()
