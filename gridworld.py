@@ -6,7 +6,6 @@ import pygame
 import pdb
 from pprint import pprint
 
-# # feature1
 
 # global variables
 BOARD_ROWS = 3
@@ -21,6 +20,7 @@ WHITE = (200, 200, 200)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 GREEN = (0, 100, 0)
+YELLOW = (255, 255, 0)
 
 
 class State:
@@ -113,17 +113,29 @@ class Agent:
         return State(state=position)
 
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        self.world = World()
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((30, 30))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.center = tuple(sum(i) for i in zip(START, (world.blockSize/2, world.blockSize/2)))
+
+    # def update(self):
+    #     self.rect.x += 5
+
 class World:
 
     def __init__(self):
         self.board = np.zeros([BOARD_ROWS, BOARD_COLS])
-        self.newWorld = np.zeros([BOARD_ROWS, BOARD_COLS])
         self.agent = Agent()
         self.states = []
         self.values = []
         self.running = True
         self.blockSize = 200
         self.SCREEN = pygame.display.set_mode((self.blockSize * BOARD_COLS, self.blockSize * BOARD_ROWS))
+        self.all_sprites = pygame.sprite.Group()
         self.init_game()
 
     def init_game(self):
@@ -149,6 +161,9 @@ class World:
                     pygame.draw.rect(self.SCREEN, WHITE, rect, 0)
                 pygame.draw.rect(self.SCREEN, WHITE, rect, 1)
 
+    def add_player(self, player):
+        self.all_sprites.add(player)
+
     def start_game(self):
 
         while self.running:
@@ -157,28 +172,9 @@ class World:
                     self.running = False
                     pygame.quit()
                     sys.exit()
+            # self.all_sprites.update()
+            self.all_sprites.draw(self.SCREEN)
             pygame.display.update()
-
-    # def draw_image(self):
-    #     fig, ax = plt.subplots()
-    #     ax.set_axis_off()
-    #     tb = Table(ax, bbox=[0, 0, 1, 1])
-    #     width, height = 1.0 / BOARD_COLS, 1.0 / BOARD_ROWS
-    #     # Add cells
-    #
-    #     for (i, j), val in np.ndenumerate(self.board):
-    #
-    #         if (i, j) == LOSE_STATE:
-    #             tb.add_cell(i, j, width, height, facecolor="RED", text=self.board[i, j])
-    #         elif (i, j) == WIN_STATE:
-    #             tb.add_cell(i, j, width, height, facecolor="GREEN", text=self.board[i, j])
-    #         elif (i, j) == WALL_STATE:
-    #             tb.add_cell(i, j, width, height, facecolor="GREY", text=self.board[i, j])
-    #         else:
-    #             tb.add_cell(i, j, width, height, facecolor="WHITE", text=self.board[i, j])
-    #
-    #     ax.add_table(tb)
-    #     plt.show()
 
     def play(self, rounds=100):
 
@@ -199,7 +195,10 @@ class World:
             self.board = newWorld
             k += 1
 
-
 if __name__ == "__main__":
     world = World()
+    player = Player()
+    world.add_player(player)
     world.start_game()
+
+
