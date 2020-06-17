@@ -6,7 +6,6 @@ import pygame
 import pdb
 from pprint import pprint
 
-
 # global variables
 BOARD_ROWS = 3
 BOARD_COLS = 4
@@ -21,7 +20,7 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 GREEN = (0, 100, 0)
 YELLOW = (255, 255, 0)
-FPS=2
+FPS = 2
 
 
 class State:
@@ -62,8 +61,8 @@ class State:
             return self.state
 
         # else:
-            # TODO
-            # pass
+        # TODO
+        # pass
 
     def actionIsLegal(self, action):
         if self.nextPosition(action) == self.state:
@@ -118,24 +117,20 @@ class Agent:
 class Player(pygame.sprite.Sprite):
 
     def __init__(self, world):
-        self.world = world
+        # self.world = world
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((30, 30))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
-        sub = tuple(sum(i) for i in zip(world.blockSize*np.array(START), (world.blockSize/2, world.blockSize/2)))
+        sub = tuple(sum(i) for i in zip(world.blockSize * np.array(START), (world.blockSize / 2, world.blockSize / 2)))
         self.rect.center = (sub[1], sub[0])
         # pdb.set_trace()
         self.position = START
 
     def update(self):
         new_move = world.agent.State.nextPosition(world.move_player_direction(self.position))
-        # # pdb.set_trace()
-        self.rect.x = new_move[1]*world.blockSize+world.blockSize/2
-        self.rect.y = new_move[0]*world.blockSize+world.blockSize/2
+        self.rect.center = (new_move[1] * world.blockSize + world.blockSize / 2, new_move[0] * world.blockSize + world.blockSize / 2)
         self.position = new_move
-
-        # pass
 
 
 class World:
@@ -144,7 +139,6 @@ class World:
         self.clock = pygame.time.Clock()
         self.board = np.zeros([BOARD_ROWS, BOARD_COLS])
         self.agent = Agent()
-
         self.states = []
         self.values = []
         self.running = True
@@ -152,7 +146,7 @@ class World:
         self.SCREEN = pygame.display.set_mode((self.blockSize * BOARD_COLS, self.blockSize * BOARD_ROWS))
         self.all_sprites = pygame.sprite.Group()
         self.init_game()
-        self.clock=pygame.time.Clock()
+        self.clock = pygame.time.Clock()
 
     def init_game(self):
         pygame.init()
@@ -182,7 +176,6 @@ class World:
 
     def start_game(self):
         k = 0
-
         while self.running:
             self.clock.tick(FPS)
             for event in pygame.event.get():
@@ -190,12 +183,14 @@ class World:
                     self.running = False
                     pygame.quit()
                     sys.exit()
+            # self.SCREEN.fill(BLACK)
             self.all_sprites.draw(self.SCREEN)
             self.all_sprites.update()
             pygame.display.flip()
             k += 1
             if k == 0:
                 pdb.set_trace()
+        pygame.quit()
 
     def play(self):
 
@@ -230,16 +225,9 @@ class World:
         return self.agent.actions[idx_max_direction]
 
 
-
 if __name__ == "__main__":
     world = World()
-    # world.drawGrid()
-
     world.play()
-
     player = Player(world)
     world.add_player(player)
-    # pdb.set_trace()
     world.start_game()
-
-
